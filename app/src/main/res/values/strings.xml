@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Geolocation</string>
+    <string name="addaninterest" >Add an interest</string>
 </resources>
