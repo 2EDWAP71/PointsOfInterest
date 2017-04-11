@@ -1,6 +1,7 @@
 package com.example.eds.geolocation;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -9,12 +10,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+
+
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
     MapView mv;
@@ -47,6 +52,33 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return true;
 
     }
+    public boolean onOptionsItemSelected(MenuItem item){
+        if (item.getItemId() == R.id.addaninterest){
+                Intent intent = new Intent(this,AddInterest.class);
+                startActivityForResult(intent, 1);
+                return true;
+        }
+
+        return false;
+
+    }
+    public void onActivityResult (int requestCode, int resultCode,Intent intent){
+        if (requestCode == 1){
+            if (resultCode == RESULT_OK){
+                Bundle extras = intent.getExtras();
+                boolean button = extras.getBoolean("com.example.button");
+                String textView = extras.getString("com.example.tx1");
+                String textView1 = extras.getString("com.example.tx2");
+                String textView2 = extras.getString("com.example.tx3");
+                if (button){
+
+                }
+
+            }
+        }
+    }
+
+
     public void updateloc(Location location){
         GeoPoint Location = new GeoPoint
                 (location.getLatitude(), location.getLongitude());
