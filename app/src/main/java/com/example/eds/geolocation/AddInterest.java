@@ -3,17 +3,11 @@ package com.example.eds.geolocation;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-
-
-import static com.example.eds.geolocation.R.id.activity_main;
-
+import java.util.jar.Attributes;
 
 
 /**
@@ -21,11 +15,24 @@ import static com.example.eds.geolocation.R.id.activity_main;
  */
 
 public class AddInterest extends Activity implements View.OnClickListener {
+
+
+    TextView name;
+    TextView types;
+    TextView Desc;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.interest);
         Button button = (Button)findViewById(R.id.button);
         button.setOnClickListener(this);
+
+        name = (TextView) findViewById(R.id.editText);;
+
+        types = (TextView) findViewById(R.id.editText2);
+
+
+        Desc = (TextView) findViewById(R.id.editText3);
 
 
 
@@ -34,31 +41,27 @@ public class AddInterest extends Activity implements View.OnClickListener {
 
     public void onClick (View v){
 
-        TextView textView = (TextView) findViewById(R.id.editText);
-        textView.setOnClickListener(this);
 
-        TextView textView1 = (TextView) findViewById(R.id.editText2);
-        textView1.setOnClickListener(this);
-
-        TextView textView2 = (TextView) findViewById(R.id.editText3);
-        textView2.setOnClickListener(this);
 
         Intent intent = new Intent();
         Bundle bundle = new Bundle();
-        boolean button = false;
-        String editText = "";
-        String editText2 = "";
-        String editText3= "";
+
+        String names = "";
+        String type = "";
+        String des= "";
 
         if (v.getId() == R.id.button){
-            button = true;
+
+           names = (name.getText().toString());
+           type = (types.getText().toString());
+            des = (Desc.getText().toString());
 
 
         }
-        bundle.putBoolean("com.example.button",button);
-        bundle.putString("com.example.tx1",editText);
-        bundle.putString("com.example.tx2",editText2);
-        bundle.putString("com.example.tx3", editText3);
+
+        bundle.putString("com.example.tx1",names);
+        bundle.putString("com.example.tx2",type);
+        bundle.putString("com.example.tx3", des);
 
 
         intent.putExtras(bundle);
