@@ -27,7 +27,7 @@ public class AddInterest extends Activity implements View.OnClickListener {
         Button button = (Button)findViewById(R.id.button);
         button.setOnClickListener(this);
 
-        name = (TextView) findViewById(R.id.editText);;
+        name = (TextView) findViewById(R.id.editText);
 
         types = (TextView) findViewById(R.id.editText2);
 

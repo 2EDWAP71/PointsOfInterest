@@ -14,10 +14,16 @@
 
     <org.osmdroid.views.MapView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="429dp"
         android:enabled="true"
         android:clickable="true"
         android:id="@+id/map1"
         tilesource="Mapnik"
         />
+
+    <Button
+        android:text="Save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/save" />
 </LinearLayout>
