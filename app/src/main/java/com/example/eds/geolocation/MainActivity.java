@@ -9,11 +9,14 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -33,13 +36,11 @@ import java.util.ArrayList;
 
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     public double latitude = 51.05;
     public double longitude = -0.72;
-    public boolean saved = false;
     public int uploaded = 0;
-    public boolean save = false;
     LocationManager mgr;
 
     ArrayList<String> A1 = new ArrayList<>(), A2 = new ArrayList<>(), A3 = new ArrayList<>(),
@@ -66,8 +67,40 @@ public class MainActivity extends AppCompatActivity {
         if (mgr1 != null) {
             updateloc(mgr1);
         }
+        Button save = (Button) findViewById(R.id.save);
+        save.setOnClickListener(this);
+    }
+
+    public void onClick (View view){
 
     }
+        int item = A1.size();
+        boolean save = false;
+        if (view.getId()==R.id.save)
+
+    {
+        save = true;
+        try {
+            BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
+                    .getExternalStorageDirectory().getAbsolutePath() + "file.txt", true));
+            for (int i = 0; i < item; i++) {
+                String B1 = A1.get(i), B2 = A2.get(i), B3 = A3.get(i), B4 = A4.get(i),
+                        B5 = A5.get(i);
+                pw.write("," + B1 + "," + B2 + "," + B3 + "," + B4 + "," + B5);
+                uploaded = uploaded + i;
+            }
+            pw.close();
+        } catch (IOException e) {
+            System.out.println("I/O Error" + e);
+        }
+    }
+
+
+
+
+
+
+
 
     public void onResume() {
         super.onResume();
@@ -75,12 +108,26 @@ public class MainActivity extends AppCompatActivity {
             mgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, myLocationListener);
             mgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, myLocationListener);
 
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences
+                    (getApplicationContext());
+            //HttpURLConnection conn = null;
 
-        } catch (SecurityException e) {
-            System.out.println("Error" + e);
 
-        }
-        new MyTask().execute("");
+            String file = preferences.getString("File", "none");
+
+            if (file.equals("Save")) {
+                new AlertDialog.Builder(this).setMessage("Working(Saved)");
+
+            }
+            if (file.equals("NoSave")) {
+                new AlertDialog.Builder(this).setMessage("Working (No save)");
+            }
+            }catch(SecurityException e){
+                System.out.println("Error" + e);
+
+            }
+
+
 
 
 
@@ -177,23 +224,6 @@ public class MainActivity extends AppCompatActivity {
                 A3.add(type);
                 A4.add(l1);
                 A5.add(l2);
-                int item = A1.size();
-                if (saved) {
-                    try {
-                        BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                                .getExternalStorageDirectory().getAbsolutePath() + "file.txt", true));
-                        for (int i = 0; i < item; i++) {
-                            String B1 = A1.get(i), B2 = A2.get(i), B3 = A3.get(i), B4 = A4.get(i),
-                                    B5 = A5.get(i);
-                            pw.write("," + B1 + "," + B2 + "," + B3 + "," + B4 + "," + B5);
-                            uploaded = uploaded + i;
-                        }
-                        pw.close();
-                    } catch (IOException e) {
-                        System.out.println("I/O Error" + e);
-                    }
-                } else {
-
 
                     items = new ItemizedIconOverlay<OverlayItem>(this, new
                             ArrayList<OverlayItem>(), markerGestureListener);
@@ -208,33 +238,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
-    }
-     class MyTask extends AsyncTask<Void,Void,String> {
-         public String doInBackgound(Void...unused) {
-             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences
-                     (getApplicationContext());
-             //HttpURLConnection conn = null;
 
-             try {
-                 String file = preferences.getString("File", "none");
 
-                 if (file.equals("Save")) {
-                     System.out.println("Working(Saved)");
 
-                 }
-                 if (file.equals("NoSave")){
-                     System.out.println("Working (No save)");
-                 }
-             } catch (Exception e) {
-                 System.out.println("Error" + e);
-             }
 
-         }
-     }
+
+
+
     public void onDestroy(){
         super.onDestroy();
         int item = A1.size();
-        if(item > uploaded) {
             try {
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
                         .getExternalStorageDirectory().getAbsolutePath() + "file.txt", true));
@@ -247,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 System.out.println("ERROR" + e);
             }
-        }
+
         finish();
     }
 
