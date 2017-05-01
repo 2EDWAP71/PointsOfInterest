@@ -1,12 +1,9 @@
 package com.example.eds.geolocation;
 
-import android.content.Context;
+
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -27,27 +24,23 @@ import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-
-
+import java.util.jar.Attributes;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public double latitude = 51.05;
-    public double longitude = -0.72;
     public int uploaded = 0;
-    LocationManager mgr;
-
-    ArrayList<String> A1 = new ArrayList<>(), A2 = new ArrayList<>(), A3 = new ArrayList<>(),
-            A4 = new ArrayList<>(), A5 = new ArrayList<>();
     MapView mv;
     ItemizedIconOverlay<OverlayItem> items;
     ItemizedIconOverlay.OnItemGestureListener<OverlayItem> markerGestureListener;
+
 
 
     @Override
@@ -57,45 +50,69 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Configuration.getInstance().load(this,
                 PreferenceManager.getDefaultSharedPreferences(this));
         setContentView(R.layout.activity_main);
-        mgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Location mgr1 = mgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         mv = (MapView) findViewById(R.id.map1);
         mv.getController().setCenter(new GeoPoint(51.05, -0.72));
         mv.setBuiltInZoomControls(true);
         mv.getController().setZoom(16);
-
-        if (mgr1 != null) {
-            updateloc(mgr1);
-        }
         Button save = (Button) findViewById(R.id.save);
         save.setOnClickListener(this);
+        Button load = (Button) findViewById(R.id.load);
+        load.setOnClickListener(this);
+
+
     }
 
-    public void onClick (View view){
+    public void onClick (View view) {
 
-    }
-        int item = A1.size();
-        boolean save = false;
-        if (view.getId()==R.id.save)
 
-    {
-        save = true;
-        try {
-            BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                    .getExternalStorageDirectory().getAbsolutePath() + "file.txt", true));
-            for (int i = 0; i < item; i++) {
-                String B1 = A1.get(i), B2 = A2.get(i), B3 = A3.get(i), B4 = A4.get(i),
-                        B5 = A5.get(i);
-                pw.write("," + B1 + "," + B2 + "," + B3 + "," + B4 + "," + B5);
-                uploaded = uploaded + i;
+        int item = items.size();
+
+
+        if (view.getId() == R.id.save)
+        {
+            try {
+                BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
+                        .getExternalStorageDirectory().getAbsolutePath() + "file.txt", true));
+                for (int i = 0; i < items.size(); i++) {
+                    items.getItem(i);
+                    pw.write(item);
+                    uploaded = uploaded + i;
+
+
+                }
+                pw.close();
+            } catch (IOException e) {
+                System.out.println("I/O Error" + e);
             }
-            pw.close();
-        } catch (IOException e) {
-            System.out.println("I/O Error" + e);
+
+
+
+
+            new AlertDialog.Builder(this).setMessage("Marker Saved to file");
         }
+
+        else if (view.getId() == R.id.load){
+            try{
+                BufferedReader reader = new BufferedReader(new FileReader("file.txt"));
+                String line;
+
+                while ((line = reader.readLine()) !=null){
+                    String[] components = line.split(",");
+                    if (components.length==5){
+                        OverlayItem Item = new OverlayItem(components[0], components[1],
+                                components[2], new GeoPoint(Double.parseDouble(components[3]),
+                                Double.parseDouble(components[4])));
+                                items.addItem(Item);
+                    }
+                }
+            }
+            catch (IOException e){
+            new AlertDialog.Builder(this).setMessage("I/O Error" + e);
+            }
+            new AlertDialog.Builder(this).setMessage("Successfully loaded from File");
+        }
+
     }
-
-
 
 
 
@@ -104,9 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void onResume() {
         super.onResume();
-        try {
-            mgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, myLocationListener);
-            mgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, myLocationListener);
+
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences
                     (getApplicationContext());
@@ -121,10 +136,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             if (file.equals("NoSave")) {
                 new AlertDialog.Builder(this).setMessage("Working (No save)");
-            }
-            }catch(SecurityException e){
-                System.out.println("Error" + e);
-
             }
 
 
@@ -168,49 +179,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         return false;
 
-    }  public void updateloc(Location location){
-        GeoPoint Location = new GeoPoint
-                (location.getLatitude(), location.getLongitude());
-        mv.getController().setCenter(Location);
-        mv.invalidate();
-
-
     }
 
-    protected LocationListener myLocationListener=
-            new LocationListener() {
-                @Override
-                public void onLocationChanged(Location newlocation) {
-                    updateloc(newlocation);
-                    longitude = newlocation.getLongitude();
-                    latitude = newlocation.getLatitude();
 
 
 
-                }
-
-                @Override
-                public void onStatusChanged(String s, int status, Bundle extras) {
-                    //TODO Auto-Generated method stub
-                }
 
 
-                @Override
-                public void onProviderEnabled(String provider) {
-                    //TODO Auto-Generated method stub
-                }
 
-                @Override
-                public void onProviderDisabled(String provider) {
-                    //TODO Auto-Generated method stub
-                }
-            };
     public void onActivityResult (int requestCode, int resultCode,Intent intent) {
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
 
-                String l1 = latitude.toString();
-                String l2 = longitude.toString();
+
                 Bundle extras = intent.getExtras();
 
 
@@ -219,19 +200,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String des = extras.getString("com.example.tx3");
 
 
-                A1.add(name);
-                A2.add(des);
-                A3.add(type);
-                A4.add(l1);
-                A5.add(l2);
 
-                    items = new ItemizedIconOverlay<OverlayItem>(this, new
+
+                double latitude =  mv.getMapCenter().getLatitude();
+                double longitude = mv.getMapCenter().getLongitude();
+
+                items = new ItemizedIconOverlay<OverlayItem>(this, new
                             ArrayList<OverlayItem>(), markerGestureListener);
-                    OverlayItem Item = new OverlayItem(name, des,
+                    OverlayItem Item = new OverlayItem(name,type, des,
                             new GeoPoint(latitude, longitude));
+
 
                     items.addItem(Item);
                     mv.getOverlays().add(items);
+
+
+
+
 
                 }
 
@@ -247,14 +232,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void onDestroy(){
         super.onDestroy();
-        int item = A1.size();
+        int item = items.size();
             try {
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
                         .getExternalStorageDirectory().getAbsolutePath() + "file.txt", true));
-                for (int i = 0; i < item; i++) {
-                    String B1 = A1.get(i), B2 = A2.get(i), B3 = A3.get(i), B4 = A4.get(i),
-                            B5 = A5.get(i);
-                    pw.write("," + B1 + "," + B2 + "," + B3 + "," + B4 + "," + B5);
+                for (int i = 0; i < items.size(); i++) {
+                        items.getItem(i);
+                    pw.write(item);
                 }
                 pw.close();
             } catch (IOException e) {
