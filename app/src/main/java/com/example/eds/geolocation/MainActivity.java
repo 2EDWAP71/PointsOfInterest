@@ -1,7 +1,7 @@
 package com.example.eds.geolocation;
 
 
-import android.content.ClipData;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Environment;
@@ -31,7 +31,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
-import java.util.jar.Attributes;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -51,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 PreferenceManager.getDefaultSharedPreferences(this));
         setContentView(R.layout.activity_main);
         mv = (MapView) findViewById(R.id.map1);
-        mv.getController().setCenter(new GeoPoint(51.05, -0.72));
+        mv.getController().setCenter(new GeoPoint(50.90, -1.40));
         mv.setBuiltInZoomControls(true);
         mv.getController().setZoom(16);
         Button save = (Button) findViewById(R.id.save);
@@ -65,14 +64,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick (View view) {
 
 
-        int item = items.size();
-
-
         if (view.getId() == R.id.save)
         {
+            int item = items.size();
             try {
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                        .getExternalStorageDirectory().getAbsolutePath() + "file.txt", true));
+                        .getExternalStorageDirectory().getAbsolutePath() + "/file.txt", true));
                 for (int i = 0; i < items.size(); i++) {
                     items.getItem(i);
                     pw.write(item);
@@ -81,19 +78,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 }
                 pw.close();
+
             } catch (IOException e) {
                 System.out.println("I/O Error" + e);
             }
+            Toast.makeText(MainActivity.this,"Marker Saved to file",
+                Toast.LENGTH_SHORT).show();
 
-
-
-
-            new AlertDialog.Builder(this).setMessage("Marker Saved to file");
         }
 
         else if (view.getId() == R.id.load){
             try{
-                BufferedReader reader = new BufferedReader(new FileReader("file.txt"));
+                BufferedReader reader = new BufferedReader(new FileReader("/file.txt"));
                 String line;
 
                 while ((line = reader.readLine()) !=null){
@@ -103,13 +99,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 components[2], new GeoPoint(Double.parseDouble(components[3]),
                                 Double.parseDouble(components[4])));
                                 items.addItem(Item);
+                                mv.getOverlays().add(items);
+                                Item.getSnippet();
+
                     }
                 }
+
             }
             catch (IOException e){
             new AlertDialog.Builder(this).setMessage("I/O Error" + e);
             }
-            new AlertDialog.Builder(this).setMessage("Successfully loaded from File");
+            Toast.makeText(MainActivity.this,"Marker successfully loaded from file",
+                    Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -131,11 +132,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             String file = preferences.getString("File", "none");
 
             if (file.equals("Save")) {
-                new AlertDialog.Builder(this).setMessage("Working(Saved)");
+                Toast.makeText(MainActivity.this,"Working(Saved)",
+                        Toast.LENGTH_SHORT).show();
 
             }
             if (file.equals("NoSave")) {
-                new AlertDialog.Builder(this).setMessage("Working (No save)");
+                Toast.makeText(MainActivity.this,"Working(No save)",
+                        Toast.LENGTH_SHORT).show();
             }
 
 
@@ -205,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 double latitude =  mv.getMapCenter().getLatitude();
                 double longitude = mv.getMapCenter().getLongitude();
 
-                items = new ItemizedIconOverlay<OverlayItem>(this, new
+                items = new ItemizedIconOverlay<>(this, new
                             ArrayList<OverlayItem>(), markerGestureListener);
                     OverlayItem Item = new OverlayItem(name,type, des,
                             new GeoPoint(latitude, longitude));
@@ -225,24 +228,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-
-
-
-
-
     public void onDestroy(){
         super.onDestroy();
         int item = items.size();
             try {
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                        .getExternalStorageDirectory().getAbsolutePath() + "file.txt", true));
+                        .getExternalStorageDirectory().getAbsolutePath() + "/file.txt", true));
                 for (int i = 0; i < items.size(); i++) {
                         items.getItem(i);
                     pw.write(item);
                 }
                 pw.close();
             } catch (IOException e) {
-                System.out.println("ERROR" + e);
+                new AlertDialog.Builder(this).setMessage("ERROR" + e);
             }
 
         finish();
