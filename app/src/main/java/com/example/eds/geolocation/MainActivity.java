@@ -57,6 +57,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button load = (Button) findViewById(R.id.load);
         load.setOnClickListener(this);
 
+        markerGestureListener=new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>()
+
+        {
+            public boolean onItemLongPress ( int i, OverlayItem item){
+                Toast.makeText(MainActivity.this, item.getSnippet(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            public boolean onItemSingleTapUp(int i, OverlayItem item) {
+                Toast.makeText(MainActivity.this, item.getSnippet(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+        };
+
+        items = new ItemizedIconOverlay<>(this, new
+                ArrayList<OverlayItem>(), markerGestureListener);
+
 
     }
 
@@ -66,14 +84,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (view.getId() == R.id.save)
         {
 
-            try {Toast.makeText(MainActivity.this,Environment
-                    .getExternalStorageDirectory().getAbsolutePath(),Toast.LENGTH_SHORT).show();
-
+            try {
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                        .getExternalStorageDirectory().getAbsolutePath() + "/file.txt"));
+                        .getExternalStorageDirectory().getAbsolutePath() + "/file1.txt"));
                 for (int i = 0; i < items.size(); i++) {
                     OverlayItem item = items.getItem(i);
-                    pw.write(item.getTitle() + "\n");
+                    pw.write(item.getTitle() + "\n," + item.getSnippet() + "," + item.getPoint() + "");
                 }
                 pw.close();
 
@@ -92,13 +108,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 while ((line = reader.readLine()) !=null){
                     String[] components = line.split(",");
-                    if (components.length==5){
-                        OverlayItem Item = new OverlayItem(components[0], components[1],
-                                components[2], new GeoPoint(Double.parseDouble(components[3]),
-                                Double.parseDouble(components[4])));
+                    if (components.length==4){
+                        OverlayItem Item = new OverlayItem(components[0],  components[1],
+                                new GeoPoint(Double.parseDouble(components[2]),
+                                Double.parseDouble(components[3])));
                                 items.addItem(Item);
                                 mv.getOverlays().add(items);
-                                Item.getSnippet();
+
 
                     }
                 }
@@ -140,23 +156,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
 
-
-
-
-    markerGestureListener=new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>()
-
-    {
-        public boolean onItemLongPress ( int i, OverlayItem item){
-        Toast.makeText(MainActivity.this, item.getSnippet(), Toast.LENGTH_SHORT).show();
-        return true;
-    }
-
-    public boolean onItemSingleTapUp(int i, OverlayItem item) {
-        Toast.makeText(MainActivity.this, item.getSnippet(), Toast.LENGTH_SHORT).show();
-        return true;
-    }
-
-};
 }
 
     public boolean onCreateOptionsMenu(Menu menu){
@@ -206,9 +205,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 double latitude =  mv.getMapCenter().getLatitude();
                 double longitude = mv.getMapCenter().getLongitude();
 
-                items = new ItemizedIconOverlay<>(this, new
-                            ArrayList<OverlayItem>(), markerGestureListener);
-                    OverlayItem Item = new OverlayItem(name,type, des,
+
+                    OverlayItem Item = new OverlayItem(name, des,
                             new GeoPoint(latitude, longitude));
 
 
@@ -228,13 +226,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void onDestroy(){
         super.onDestroy();
-        int item = items.size();
             try {
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                        .getExternalStorageDirectory().getAbsolutePath() + "/file.txt", true));
+                        .getExternalStorageDirectory().getAbsolutePath() + "/file1.txt", true));
                 for (int i = 0; i < items.size(); i++) {
-                        items.getItem(i);
-                    pw.write(item);
+                       OverlayItem Item = items.getItem(i);
+                    pw.write(Item.getTitle() + "\n"  + Item.getPoint() + "," + Item.getSnippet() + "");
                 }
                 pw.close();
             } catch (IOException e) {
