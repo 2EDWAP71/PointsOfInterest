@@ -35,7 +35,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public int uploaded = 0;
     MapView mv;
     ItemizedIconOverlay<OverlayItem> items;
     ItemizedIconOverlay.OnItemGestureListener<OverlayItem> markerGestureListener;
@@ -66,23 +65,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (view.getId() == R.id.save)
         {
-            int item = items.size();
-            try {
+
+            try {Toast.makeText(MainActivity.this,Environment
+                    .getExternalStorageDirectory().getAbsolutePath(),Toast.LENGTH_SHORT).show();
+
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                        .getExternalStorageDirectory().getAbsolutePath() + "/file.txt", true));
+                        .getExternalStorageDirectory().getAbsolutePath() + "/file.txt"));
                 for (int i = 0; i < items.size(); i++) {
-                    items.getItem(i);
-                    pw.write(item);
-                    uploaded = uploaded + i;
-
-
+                    OverlayItem item = items.getItem(i);
+                    pw.write(item.getTitle() + "\n");
                 }
                 pw.close();
 
             } catch (IOException e) {
                 System.out.println("I/O Error" + e);
             }
-            Toast.makeText(MainActivity.this,"Marker Saved to file",
+            Toast.makeText(MainActivity.this,"Marker(s) Saved to file",
                 Toast.LENGTH_SHORT).show();
 
         }
@@ -109,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             catch (IOException e){
             new AlertDialog.Builder(this).setMessage("I/O Error" + e);
             }
-            Toast.makeText(MainActivity.this,"Marker successfully loaded from file",
+            Toast.makeText(MainActivity.this,"Marker(s) successfully loaded from file",
                     Toast.LENGTH_SHORT).show();
         }
 

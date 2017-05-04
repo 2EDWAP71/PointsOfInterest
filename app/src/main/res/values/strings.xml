@@ -2,4 +2,6 @@
     <string name="app_name">Geolocation</string>
     <string name="addaninterest" >Add an interest</string>
     <string name="Preferences">Preferences</string>
+    <string name="Save">Save to file</string>
+    <string name="Load">Load from file</string>
 </resources>
