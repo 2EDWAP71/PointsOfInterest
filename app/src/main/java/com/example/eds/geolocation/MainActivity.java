@@ -4,6 +4,7 @@ package com.example.eds.geolocation;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -29,7 +30,10 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 
@@ -57,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Button load = (Button) findViewById(R.id.load);
         load.setOnClickListener(this);
 
+
         markerGestureListener=new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>()
 
         {
@@ -74,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         items = new ItemizedIconOverlay<>(this, new
                 ArrayList<OverlayItem>(), markerGestureListener);
-
+        mv.getOverlays().add(items);
 
     }
 
@@ -86,10 +91,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             try {
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                        .getExternalStorageDirectory().getAbsolutePath() + "/file1.txt"));
+                        .getExternalStorageDirectory().getAbsolutePath() + "/file.txt"));
                 for (int i = 0; i < items.size(); i++) {
                     OverlayItem item = items.getItem(i);
-                    pw.write(item.getTitle() + "\n," + item.getSnippet() + "," + item.getPoint() + "");
+                    pw.write(item.getTitle() + "," + item.getSnippet() + "," + item.getPoint() + "");
+                    pw.newLine();
                 }
                 pw.close();
 
@@ -113,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 new GeoPoint(Double.parseDouble(components[2]),
                                 Double.parseDouble(components[3])));
                                 items.addItem(Item);
-                                mv.getOverlays().add(items);
+
 
 
                     }
@@ -140,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences
                     (getApplicationContext());
-            //HttpURLConnection conn = null;
+
 
 
             String file = preferences.getString("File", "none");
@@ -153,7 +159,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (file.equals("NoSave")) {
                 Toast.makeText(MainActivity.this,"Working(No save)",
                         Toast.LENGTH_SHORT).show();
+
             }
+        mv.getOverlays().add(items);
 
 
 }
@@ -174,6 +182,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (item.getItemId() == R.id.prefs){
            Intent intent = new Intent(this,MyPrefsActivity.class);
            startActivityForResult(intent, 2);
+            return true;
+        }
+        if(item.getItemId() == R.id.loadWeb){
+            new loadFile().execute("");
+            Toast.makeText(MainActivity.this,"Markers Successfully Loaded from Web",
+            Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -228,10 +242,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
             try {
                 BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
-                        .getExternalStorageDirectory().getAbsolutePath() + "/file1.txt", true));
+                        .getExternalStorageDirectory().getAbsolutePath() + "/file.txt"));
                 for (int i = 0; i < items.size(); i++) {
                        OverlayItem Item = items.getItem(i);
-                    pw.write(Item.getTitle() + "\n"  + Item.getPoint() + "," + Item.getSnippet() + "");
+                    pw.write(Item.getTitle() + ","  +Item.getSnippet()  + "," + Item.getPoint() + "");
+                    pw.newLine();
                 }
                 pw.close();
             } catch (IOException e) {
@@ -239,6 +254,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         finish();
+    }
+
+    class loadFile extends AsyncTask<String,Void,String>{
+        @Override
+        protected String doInBackground(String...params){
+            try{
+            HttpURLConnection connection;
+            URL url = new URL ("http://www.free-map.org.uk/course/mad/ws/get.php?year=17&username=user022&format=csv");
+                connection = (HttpURLConnection) url.openConnection();
+                InputStream stream = connection.getInputStream();
+                if (connection.getResponseCode() == 200) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                    String line;
+                    while((line = reader.readLine()) != null)
+                    {
+                        String [] data = line.split(",");
+                        if (data.length == 5){
+                            OverlayItem item = new OverlayItem (data[0],
+                                    data[2], new GeoPoint(Double.parseDouble (data[3])
+                                    ,Double.parseDouble(data[4])));
+                            items.addItem(item);
+                        }
+                    }
+                }
+        }
+            catch(IOException e){
+                System.out.println("Error" + e.toString());
+            }
+            return null;
+        }
+
     }
 
 
