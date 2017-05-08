@@ -32,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -90,12 +91,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
 
             try {
-                BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
+                PrintWriter pw = new PrintWriter(new FileWriter(Environment
                         .getExternalStorageDirectory().getAbsolutePath() + "/file.txt"));
                 for (int i = 0; i < items.size(); i++) {
                     OverlayItem item = items.getItem(i);
-                    pw.write(item.getTitle() + "," + item.getSnippet() + "," + item.getPoint() + "");
-                    pw.newLine();
+                    pw.println(item.getTitle() + "," + item.getSnippet() + "," + item.getPoint() + "");
+
                 }
                 pw.close();
 
@@ -109,16 +110,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         else if (view.getId() == R.id.load){
             try{
-                BufferedReader reader = new BufferedReader(new FileReader("/file.txt"));
+                BufferedReader reader = new BufferedReader(new FileReader (Environment.getExternalStorageDirectory()
+                .getAbsolutePath() + "/file.txt"));
                 String line;
 
                 while ((line = reader.readLine()) !=null){
                     String[] components = line.split(",");
-                    if (components.length==4){
+                    if (components.length==5){
                         OverlayItem Item = new OverlayItem(components[0],  components[1],
                                 new GeoPoint(Double.parseDouble(components[2]),
                                 Double.parseDouble(components[3])));
                                 items.addItem(Item);
+                                mv.invalidate();
 
 
 
@@ -226,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     items.addItem(Item);
                     mv.getOverlays().add(items);
-
+                    mv.invalidate();
 
 
 
@@ -237,16 +240,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-
+    @Override
     public void onDestroy(){
         super.onDestroy();
             try {
-                BufferedWriter pw = new BufferedWriter(new FileWriter(Environment
+                PrintWriter pw = new PrintWriter(new FileWriter(Environment
                         .getExternalStorageDirectory().getAbsolutePath() + "/file.txt"));
                 for (int i = 0; i < items.size(); i++) {
                        OverlayItem Item = items.getItem(i);
-                    pw.write(Item.getTitle() + ","  +Item.getSnippet()  + "," + Item.getPoint() + "");
-                    pw.newLine();
+                    pw.println(Item.getTitle() + ","  +Item.getSnippet()  + "," + Item.getPoint() + "");
+
                 }
                 pw.close();
             } catch (IOException e) {
@@ -275,6 +278,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     data[2], new GeoPoint(Double.parseDouble (data[3])
                                     ,Double.parseDouble(data[4])));
                             items.addItem(item);
+                            
                         }
                     }
                 }
