@@ -4,4 +4,5 @@
     <string name="Preferences">Preferences</string>
     <string name="Save">Save to file</string>
     <string name="Load">Load from file</string>
+    <string name="LoadWeb">Load Markers From Web</string>
 </resources>
